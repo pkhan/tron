@@ -1,0 +1,48 @@
+body{
+  background-color: #111;
+}
+
+.grid{
+  height: 400px;
+  width: 400px;
+  margin: auto;
+}
+
+.cell{
+  background-color: #222;
+  margin-right: 1px;
+  margin-bottom: 1px;
+  float: left;
+}
+
+.tron1{
+  background-color: #6CC;
+}
+
+.tron1.path{
+  background-color: #2E6667;
+}
+
+.tron2{
+  background-color: #F06;
+}
+
+.tron2.path{
+  background-color: #72002B;
+}
+
+.tron3{
+  background-color: #FC0;
+}
+
+.tron3.path{
+  background-color: #816700;
+}
+
+.tron4{
+  background-color: #9F0;
+}
+
+.tron4.path{
+  background-color: #3B6700;
+}
