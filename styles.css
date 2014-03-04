@@ -70,33 +70,33 @@ body{
 }
 
 .tron1{
-  background-color: #6DD;
-}
-
-.tron1.path{
   background-color: #2E6667;
 }
 
-.tron2{
-  background-color: #F06;
+.tron1.bike{
+  background-color: #6DD;
 }
 
-.tron2.path{
+.tron2{
   background-color: #72002B;
 }
 
-.tron3{
-  background-color: #FC0;
+.tron2.bike{
+  background-color: #F06;
 }
 
-.tron3.path{
+.tron3{
   background-color: #816700;
 }
 
-.tron4{
-  background-color: #6f9;
+.tron3.bike{
+  background-color: #FC0;
 }
 
-.tron4.path{
+.tron4{
   background-color: #2F804A;
+}
+
+.tron4.bike{
+  background-color: #6f9;
 }
