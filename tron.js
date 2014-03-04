@@ -1,6 +1,6 @@
 $(function(){
-    var gridLength = 51; //cells
-    var cellSize = 11; //px
+    var gridLength = 60; //cells
+    var cellSize = 8; //px
 
     var styles = $('<style type="text/css">.cell{ height: ' + (cellSize-1) + 'px; width: ' + (cellSize-1) + 'px}</style>');
 
@@ -12,18 +12,34 @@ $(function(){
     for(var i=0; i<gridLength; i++){
       for(var j=0; j<gridLength; j++){
 
-        //get rid of this part BEGIN
-        if(i === 1){
+        //get rid of this part: placeholder tron paths BEGIN =============================
+        if(i === 34 && j >= 11){
+          if (j != 11){
           grid.append('<div class="cell tron1 path"></div>');
-        }else if(i === 4){
+          } else {
+            grid.append('<div class="cell tron1"></div>');
+          }
+        }else if(i === 4 && j <= 32){
+          if (j != 32){
           grid.append('<div class="cell tron2 path"></div>');
-        }else if(i === 9){
+          } else {
+            grid.append('<div class="cell tron2"></div>');
+          }
+        }else if(i === 9 && j >= 3){
+          if (j != 3){
           grid.append('<div class="cell tron3 path"></div>');
-        }else if(i === 11){
+          } else {
+            grid.append('<div class="cell tron3"></div>');
+          }
+        }else if(i === 20 && j <=28){
+          if (j != 28){
           grid.append('<div class="cell tron4 path"></div>');
+          } else {
+            grid.append('<div class="cell tron4"></div>');
+          }
         } else {
-        // END
-        
+        // END =============================================================================
+
           grid.append('<div class="cell"></div>');
         }
       }
