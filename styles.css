@@ -4,6 +4,14 @@ body{
   background-image: url("img/stardust.png");
 }
 
+#start-game {
+  font-family: Revalia;
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: #DDD;
+}
+
 .scoreboard{
   width: 600px;
   text-align: center;

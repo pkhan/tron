@@ -1,11 +1,21 @@
 $(function(){
     window.game = new Game({
         gridLength: 60,
-        frameRate: 10
+        frameRate: 10,
+        players: 4,
+        playerAI: [
+            DefaultPlayerAI,
+            DefaultPlayerAI,
+            DefaultPlayerAI,
+            DefaultPlayerAI
+        ]
     });
     window.gridView = new GridView(game, 8);
     gridView.$styles.appendTo('body');
     gridView.render().$el.appendTo('body');
+    $('#start-game').on('click', function() {
+        game.start();
+    });
 });
 
 var PlayerAI = function() {};
@@ -272,6 +282,7 @@ _.extend(Game.prototype, {
         this.players[0].row = 0;
         this.players[0].col = 30;
         this.players[0].direction = 's';
+        this.players[0].alive = true;
         cell = this.grid.getCell(0, 30);
         cell.bike = true;
         cell.playerNum = 0;
@@ -280,6 +291,7 @@ _.extend(Game.prototype, {
         this.players[1].row = 30;
         this.players[1].col = 59;
         this.players[1].direction = 'w';
+        this.players[1].alive = true;
         cell = this.grid.getCell(30, 59);
         cell.bike = true;
         cell.playerNum = 1;
@@ -288,6 +300,7 @@ _.extend(Game.prototype, {
         this.players[2].row = 59;
         this.players[2].col = 30;
         this.players[2].direction = 'n';
+        this.players[2].alive = true;
         cell = this.grid.getCell(59, 30);
         cell.bike = true;
         cell.playerNum = 2;
@@ -296,6 +309,7 @@ _.extend(Game.prototype, {
         this.players[3].row = 30;
         this.players[3].col = 0;
         this.players[3].direction = 'e';
+        this.players[3].alive = true;
         cell = this.grid.getCell(30, 0);
         cell.bike = true;
         cell.playerNum = 3;
@@ -415,7 +429,7 @@ _.extend(GridView.prototype, {
         return this;
     },
     reset: function() {
-        this.$el.find('cell')
+        this.$el.find('.cell')
         .removeClass('bike')
         .removeClass('tron1')
         .removeClass('tron2')
