@@ -4,7 +4,7 @@ body{
   background-image: url("img/stardust.png");
 }
 
-#start-game {
+button {
   font-family: Revalia;
   border: none;
   cursor: pointer;

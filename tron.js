@@ -4,8 +4,8 @@ $(function(){
         frameRate: 10,
         players: 4,
         playerAI: [
-            DefaultPlayerAI,
-            DefaultPlayerAI,
+            ZXPlayerAI,
+            LRPlayerAI,
             DefaultPlayerAI,
             DefaultPlayerAI
         ]
@@ -16,19 +16,70 @@ $(function(){
     $('#start-game').on('click', function() {
         game.start();
     });
+    $('#stop-game').on('click', function() {
+        game.stop();
+    });
 });
+
+var Extendable = {
+    extend: function(props) {
+        var parent = this;
+        var child = function() { return parent.apply(this); };
+        child.prototype = new this;
+        _.extend(child.prototype, props);
+        _.extend(child, Extendable);
+        return child;
+    }
+};
 
 var PlayerAI = function() {};
 
-PlayerAI.extend = function(props) {
-    var parent = this;
-    var child = function() { return parent.apply(this); };
-    child.prototype = new PlayerAI;
-    _.extend(child.prototype, props);
-    return child;
-};
+_.extend(PlayerAI, {
+    init: function() {}
+}, Extendable);
+
+var HumanPlayerAI = PlayerAI.extend({
+    left: 90,
+    right: 88,
+    reset: function() {
+        this.nextMove = [];
+    },
+    init: function() {
+        this.nextMove = [];
+        var self = this;
+        $("body").on("keydown", function(evt) {
+            if(evt.which == self.left) {
+                self.nextMove.push("left");
+            }
+            if(evt.which == self.right) { 
+                self.nextMove.push("right");
+            }
+        });
+    },
+    generateMove: function() {
+        var nextMove = this.nextMove.shift();
+        if (!nextMove) {
+            nextMove = "stay";
+        }
+        return nextMove;
+    }
+});
+
+var ZXPlayerAI = HumanPlayerAI.extend({
+    left: 90,
+    right: 88
+});
+
+var LRPlayerAI = HumanPlayerAI.extend({
+    left: 37,
+    right: 39
+});
 
 var DefaultPlayerAI = PlayerAI.extend({
+    init: function() {
+    },
+    reset: function() {
+    },
     generateMove: function(gameState, grid, player) {
         var row = player.row;
         var col = player.col;
@@ -95,15 +146,18 @@ var DefaultPlayerAI = PlayerAI.extend({
 });
 
 var Events = {
-    on: function(cb) {
+    on: function(event, cb) {
         if (!this.callbacks) {
-            this.callbacks = [];
+            this.callbacks = {};
         }
-        this.callbacks.push(cb);
+        if (!this.callbacks[event]) {
+            this.callbacks[event] = [];
+        }
+        this.callbacks[event].push(cb);
     },
-    trigger: function() {
+    trigger: function(event) {
         var self = this;
-        _.each(this.callbacks, function(cb) {
+        _.each(this.callbacks[event], function(cb) {
             cb.apply(self, self.toJSON());
         });
     }
@@ -128,12 +182,16 @@ _.extend(Cell.prototype, {
 var Player = function(number, ai) {
     this.number = number;
     this.ai = ai;
+    this.score = 0;
 };
 
 _.extend(Player.prototype, {
     alive: true,
     direction: 'n', //n, s, e, w
     points: 0,
+    reset: function() {
+        this.ai.reset();
+    },
     move: function(gameState, grid) {
         var turn = this.ai.generateMove(gameState, grid, this);
         var direction = this.direction;
@@ -267,17 +325,19 @@ var Game = function(opts) {
     this.players = [];
     for (var i = 0; i < opts.players; i++) {
         var ai = new opts.playerAI[i]();
+        ai.init();
         this.players.push(new Player(i, ai));
     }
     this.grid = new Grid(opts.gridLength);
 };
 
 _.extend(Game.prototype, {
-    round: 0,
+    round: 1,
     start: function() {
+        this.round = 1;
         var cell;
         this.grid.reset();
-        this.trigger();
+        this.trigger('start');
 
         this.players[0].row = 0;
         this.players[0].col = 30;
@@ -286,7 +346,7 @@ _.extend(Game.prototype, {
         cell = this.grid.getCell(0, 30);
         cell.bike = true;
         cell.playerNum = 0;
-        cell.trigger();
+        cell.trigger('update');
 
         this.players[1].row = 30;
         this.players[1].col = 59;
@@ -295,7 +355,7 @@ _.extend(Game.prototype, {
         cell = this.grid.getCell(30, 59);
         cell.bike = true;
         cell.playerNum = 1;
-        cell.trigger();
+        cell.trigger('update');
 
         this.players[2].row = 59;
         this.players[2].col = 30;
@@ -304,7 +364,7 @@ _.extend(Game.prototype, {
         cell = this.grid.getCell(59, 30);
         cell.bike = true;
         cell.playerNum = 2;
-        cell.trigger();
+        cell.trigger('update');
 
         this.players[3].row = 30;
         this.players[3].col = 0;
@@ -313,7 +373,9 @@ _.extend(Game.prototype, {
         cell = this.grid.getCell(30, 0);
         cell.bike = true;
         cell.playerNum = 3;
-        cell.trigger();
+        cell.trigger('update');
+
+        _.invoke(this.players, "reset");
 
         var self = this;
         this.interval = window.setInterval(function() {
@@ -345,18 +407,18 @@ _.extend(Game.prototype, {
             if (!player.alive) {
                 aliveCount--;
             } else {
-                livingPlayer = player;
                 died = self.grid.isCellFilled(player.row, player.col);
                 if (died) {
                     aliveCount--;
                     player.alive = false;
                 } else {
+                    livingPlayer = player;
                     cells[i].bike = false;
-                    cells[i].trigger();
+                    cells[i].trigger('update');
                     cell = self.grid.getCell(player.row, player.col);
                     cell.bike = true;
                     cell.playerNum = player.number;
-                    cell.trigger();
+                    cell.trigger('update');
                 }
             }
         });
@@ -368,6 +430,7 @@ _.extend(Game.prototype, {
         this.stop();
         player.score++;
         this.round++;
+        this.trigger('win');
         var self = this;
         window.setTimeout(function() {
             self.start();
@@ -381,11 +444,28 @@ _.extend(Game.prototype, {
     }
 }, Events);
 
+var ScoreBoard = function(game) {
+    this.players = game.players;
+    this.game = game;
+    this.$el = $(".scoreboard");
+    var self = this;
+};
+
+_.extend(ScoreBoard.prototype, {
+    updateScores: function() {
+        $scores = this.$el.find(".player h1");
+        _.each(this.players, function(player, index) {
+            $($scores[index]).text(player.score);
+        });
+        this.$el.find(".round h1").text(this.game.round);
+    }
+});
+
 var CellView = function(cell) {
     this.cell = cell;
     this.$el = $('<div class="cell"></div>');
     var self = this;
-    this.cell.on(function() {
+    this.cell.on('update', function() {
         self.update();
     });
 };
@@ -406,6 +486,7 @@ _.extend(CellView.prototype, {
 });
 
 var GridView = function(game, cellSize) {
+    this.scoreboard = new ScoreBoard(game);
     this.game = game;
     this.cellSize = cellSize;
     this.$styles = $('<style type="text/css">.cell{ height: ' + (cellSize-1) + 'px; width: ' + (cellSize-1) + 'px;}.grid{ width: ' + (game.grid.size*cellSize) + 'px; height: ' + (game.grid.size*cellSize) + 'px;} </style>');
@@ -414,8 +495,11 @@ var GridView = function(game, cellSize) {
         this.cellViews.push(new CellView(game.grid.cells[i]));
     }
     var self = this;
-    this.game.on(function() {
+    this.game.on('start', function() {
         self.reset();
+    });
+    this.game.on('win', function() {
+        self.scoreboard.updateScores();
     });
 };
 
