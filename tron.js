@@ -1,13 +1,13 @@
 $(function(){
     window.game = new Game({
         gridLength: 60,
-        frameRate: 10,
+        frameRate: 60,
         players: 4,
         playerAI: [
-            ZXPlayerAI,
-            LRPlayerAI,
-            DefaultPlayerAI,
-            DefaultPlayerAI
+            FillSpaceAI,
+            FillSpaceAI,
+            FillSpaceAI,
+            FillSpaceAI
         ]
     });
     window.gridView = new GridView(game, 8);
@@ -34,9 +34,12 @@ var Extendable = {
 
 var PlayerAI = function() {};
 
-_.extend(PlayerAI, {
-    init: function() {}
-}, Extendable);
+_.extend(PlayerAI.prototype, {
+    init: function() {},
+    reset: function() {},
+});
+
+_.extend(PlayerAI, Extendable);
 
 var HumanPlayerAI = PlayerAI.extend({
     left: 90,
@@ -76,10 +79,6 @@ var LRPlayerAI = HumanPlayerAI.extend({
 });
 
 var DefaultPlayerAI = PlayerAI.extend({
-    init: function() {
-    },
-    reset: function() {
-    },
     generateMove: function(gameState, grid, player) {
         var row = player.row;
         var col = player.col;
@@ -310,7 +309,7 @@ _.extend(Grid.prototype, {
 var Game = function(opts) {
     opts = opts || {};
     _.defaults(opts, {
-        gridLength: 60, //cells
+        gridLength: 61, //cells
         players: 4,
         playerAI : [
             DefaultPlayerAI,
@@ -340,37 +339,37 @@ _.extend(Game.prototype, {
         this.trigger('start');
 
         this.players[0].row = 0;
-        this.players[0].col = 30;
+        this.players[0].col = 31;
         this.players[0].direction = 's';
         this.players[0].alive = true;
-        cell = this.grid.getCell(0, 30);
+        cell = this.grid.getCell(0, 31);
         cell.bike = true;
         cell.playerNum = 0;
         cell.trigger('update');
 
-        this.players[1].row = 30;
+        this.players[1].row = 31;
         this.players[1].col = 59;
         this.players[1].direction = 'w';
         this.players[1].alive = true;
-        cell = this.grid.getCell(30, 59);
+        cell = this.grid.getCell(31, 59);
         cell.bike = true;
         cell.playerNum = 1;
         cell.trigger('update');
 
         this.players[2].row = 59;
-        this.players[2].col = 30;
+        this.players[2].col = 31;
         this.players[2].direction = 'n';
         this.players[2].alive = true;
-        cell = this.grid.getCell(59, 30);
+        cell = this.grid.getCell(59, 31);
         cell.bike = true;
         cell.playerNum = 2;
         cell.trigger('update');
 
-        this.players[3].row = 30;
+        this.players[3].row = 31;
         this.players[3].col = 0;
         this.players[3].direction = 'e';
         this.players[3].alive = true;
-        cell = this.grid.getCell(30, 0);
+        cell = this.grid.getCell(31, 0);
         cell.bike = true;
         cell.playerNum = 3;
         cell.trigger('update');
