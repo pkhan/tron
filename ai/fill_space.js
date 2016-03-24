@@ -53,14 +53,12 @@ var FillSpaceAI = PlayerAI.extend({
   playerNextMoves: function(players) {
     // Avoid game of chicken
     var self = this;
-    console.log(players);
     nextPositions = [];
     _.each(players, function(player) {
       if(player.row && player.col && player.direction) {
         nextPositions.push(self.nextPos(player.row, player.col, player.direction));
       }
     });
-    console.log(nextPositions);
     return nextPositions;
   },
 
@@ -96,13 +94,13 @@ var FillSpaceAI = PlayerAI.extend({
 
     }
 
-    var nextDirection = this.turnToDir(nextMove);
+    var nextDirection = this.turnToDir(direction, nextMove);
     var weights = this.weightDirections(gameState, row, col, direction, grid);
     var max = 0;
     var bestDirection = direction;
     var weight;
 
-    if(weights[nextMove] < 5) {
+    if(weights[nextDirection] < 5) {
       for(dir in weights){
         weight = weights[dir];
         if(weight > max) {
@@ -135,7 +133,10 @@ var FillSpaceAI = PlayerAI.extend({
     var nextPos, key;
 
     if(depth == 0) {
-      var avoids = this.playerNextMoves(gameState.players);
+      var otherPlayers = _.reject(gameState.players, function(player){
+        return player.row == row && player.col == col;
+      });
+      var avoids = this.playerNextMoves(otherPlayers);
       _.each(avoids, function(avoid) {
         key = avoid.row + "x" + avoid.col;
         weights[key] = 0;
