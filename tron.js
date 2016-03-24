@@ -335,9 +335,10 @@ _.extend(Game.prototype, {
     move: function() {
         var self = this;
         var cells = [];
+        var gameState = this.toJSON();
         _.each(this.players, function(player) {
             cells.push(self.grid.getCell(player.row, player.col));
-            player.move(self.toJSON(), self.grid);
+            player.move(gameState, self.grid);
         });
         return cells;
     },
