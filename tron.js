@@ -1,4 +1,6 @@
 $(function(){
+    // replace one of the FillSpaceAI or DefaultPlayerAIs with
+    // LR/ZXPlayerAI to play the game
     window.game = new Game({
         gridLength: 61,
         frameRate: 60,
@@ -54,7 +56,7 @@ var HumanPlayerAI = PlayerAI.extend({
             if(evt.which == self.left) {
                 self.nextMove.push("left");
             }
-            if(evt.which == self.right) { 
+            if(evt.which == self.right) {
                 self.nextMove.push("right");
             }
         });
