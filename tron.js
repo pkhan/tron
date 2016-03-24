@@ -1,6 +1,6 @@
 $(function(){
     window.game = new Game({
-        gridLength: 60,
+        gridLength: 61,
         frameRate: 60,
         players: 4,
         playerAI: [
@@ -333,43 +333,42 @@ var Game = function(opts) {
 _.extend(Game.prototype, {
     round: 1,
     start: function() {
-        this.round = 1;
         var cell;
         this.grid.reset();
         this.trigger('start');
 
         this.players[0].row = 0;
-        this.players[0].col = 31;
+        this.players[0].col = 30;
         this.players[0].direction = 's';
         this.players[0].alive = true;
-        cell = this.grid.getCell(0, 31);
+        cell = this.grid.getCell(0, 30);
         cell.bike = true;
         cell.playerNum = 0;
         cell.trigger('update');
 
-        this.players[1].row = 31;
-        this.players[1].col = 59;
+        this.players[1].row = 30;
+        this.players[1].col = 60;
         this.players[1].direction = 'w';
         this.players[1].alive = true;
-        cell = this.grid.getCell(31, 59);
+        cell = this.grid.getCell(30, 60);
         cell.bike = true;
         cell.playerNum = 1;
         cell.trigger('update');
 
-        this.players[2].row = 59;
-        this.players[2].col = 31;
+        this.players[2].row = 60;
+        this.players[2].col = 30;
         this.players[2].direction = 'n';
         this.players[2].alive = true;
-        cell = this.grid.getCell(59, 31);
+        cell = this.grid.getCell(60, 30);
         cell.bike = true;
         cell.playerNum = 2;
         cell.trigger('update');
 
-        this.players[3].row = 31;
+        this.players[3].row = 30;
         this.players[3].col = 0;
         this.players[3].direction = 'e';
         this.players[3].alive = true;
-        cell = this.grid.getCell(31, 0);
+        cell = this.grid.getCell(30, 0);
         cell.bike = true;
         cell.playerNum = 3;
         cell.trigger('update');
@@ -402,6 +401,13 @@ _.extend(Game.prototype, {
         var playerCount = this.players.length;
         var aliveCount = playerCount;
         var livingPlayer, died, cell;
+        var playersOnSameCell = this.playersOnSameCell();
+
+        _.each(playersOnSameCell, function(player) {
+            aliveCount--;
+            player.alive = false;
+        });
+
         _.each(this.players, function(player, i) {
             if (!player.alive) {
                 aliveCount--;
@@ -410,11 +416,11 @@ _.extend(Game.prototype, {
                 if (died) {
                     aliveCount--;
                     player.alive = false;
-                } else {
+                } else if(player.alive) {
                     livingPlayer = player;
                     cells[i].bike = false;
                     cells[i].trigger('update');
-                    cell = self.grid.getCell(player.row, player.col);
+                    var cell = self.grid.getCell(player.row, player.col);
                     cell.bike = true;
                     cell.playerNum = player.number;
                     cell.trigger('update');
@@ -425,9 +431,28 @@ _.extend(Game.prototype, {
             this.win(livingPlayer);
         }
     },
+    playersOnSameCell: function() {
+        var matches = {};
+        _.each(this.players, function(player) {
+            var key = player.row + "X" + player.col;
+            if(!matches[key]) {
+                matches[key] = [];
+            }
+            matches[key].push(player);
+        });
+        var players = []
+        for(key in matches) {
+            if(matches[key].length > 1) {
+                players = players.concat(matches[key]);
+            }
+        }
+        return players;
+    },
     win: function(player) {
         this.stop();
-        player.score++;
+        if(player) {
+            player.score++;
+        }
         this.round++;
         this.trigger('win');
         var self = this;
