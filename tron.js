@@ -6,9 +6,9 @@ $(function(){
         frameRate: 60,
         players: 4,
         playerAI: [
+            DefaultRandomAI,
             FillSpaceAI,
-            FillSpaceAI,
-            FillSpaceAI,
+            DefaultRandomAI,
             FillSpaceAI
         ]
     });
@@ -237,7 +237,9 @@ _.extend(Grid.prototype, {
     },
     toJSON: function() {
         return {
-            cells: _.invoke(this.cells, 'toJSON')
+            cells: _.map(this.cells, function(cell) {
+                return cell.toJSON();
+            })
         };
     }
 }, Events)
@@ -309,7 +311,9 @@ _.extend(Game.prototype, {
         cell.playerNum = 3;
         cell.trigger('update');
 
-        _.invoke(this.players, "reset");
+        _.each(this.players, function(player) {
+            player.reset();
+        });
 
         var self = this;
         this.interval = window.setInterval(function() {
@@ -411,7 +415,9 @@ _.extend(Game.prototype, {
     },
     toJSON: function() {
         return {
-            players: _.invoke(this.players, 'toJSON'),
+            players: _.map(this.players, function(player) {
+                return player.toJSON()
+            }),
             grid: this.grid.toJSON()
         };
     }
