@@ -7,9 +7,9 @@ $(function(){
         players: 4,
         playerAI: [
             FillSpaceAI,
-            DefaultRandomAI,
             FillSpaceAI,
-            DefaultRandomAI
+            FillSpaceAI,
+            FillSpaceAI
         ]
     });
     window.gridView = new GridView(game, 8);
@@ -317,7 +317,12 @@ _.extend(Game.prototype, {
         }, 1000 / self.frameRate);
     },
     stop: function() {
-        window.clearInterval(this.interval);
+        if(this.interval) {
+            window.clearInterval(this.interval);
+        }
+        if(this.timeout) {
+            window.clearTimeout(this.timeout);
+        }
     },
     tick: function() {
         var cells = this.move();
@@ -336,12 +341,14 @@ _.extend(Game.prototype, {
         var self = this;
         var playerCount = this.players.length;
         var aliveCount = playerCount;
-        var livingPlayer, died, cell;
+        var livingPlayer, died, cell, playerIndex;
         var playersOnSameCell = this.playersOnSameCell();
 
         _.each(playersOnSameCell, function(player) {
             aliveCount--;
             player.alive = false;
+            playerIndex = self.players.indexOf(player);
+            self.markCell(player, cells[playerIndex]);
         });
 
         _.each(this.players, function(player, i) {
@@ -354,12 +361,7 @@ _.extend(Game.prototype, {
                     player.alive = false;
                 } else if(player.alive) {
                     livingPlayer = player;
-                    cells[i].bike = false;
-                    cells[i].trigger('update');
-                    var cell = self.grid.getCell(player.row, player.col);
-                    cell.bike = true;
-                    cell.playerNum = player.number;
-                    cell.trigger('update');
+                    self.markCell(player, cells[i]);
                 }
             }
         });
@@ -367,6 +369,17 @@ _.extend(Game.prototype, {
             this.win(livingPlayer);
         }
     },
+
+    markCell: function(player, oldCell) {
+        var cell;
+        oldCell.bike = false;
+        oldCell.trigger('update');
+        cell = this.grid.getCell(player.row, player.col);
+        cell.bike = true;
+        cell.playerNum = player.number;
+        cell.trigger('update');
+    },
+
     playersOnSameCell: function() {
         var matches = {};
         _.each(this.players, function(player) {
@@ -392,7 +405,7 @@ _.extend(Game.prototype, {
         this.round++;
         this.trigger('win');
         var self = this;
-        window.setTimeout(function() {
+        this.timeout = window.setTimeout(function() {
             self.start();
         }, 4000);
     },

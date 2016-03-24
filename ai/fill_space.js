@@ -13,10 +13,12 @@ var FillSpaceAI = PlayerAI.extend({
     's': 'e',
     'w': 's'
   },
+  
   reset: function() {
     this.lastMove = null;
     this.shouldDoubleBack = false;
   },
+
   generateMove: function(gameState, grid, player) {
     var row = player.row;
     var col = player.col;
